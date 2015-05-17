@@ -615,24 +615,17 @@ Command.prototype.parseArgs = function(args, unknown) {
 
   if (args.length){
 
-    var name, prefixes = [args.shift()], i = 0;
-
-    while ((i<args.length) && (args[0][0] != '-') && (args[0][0] != '"') && (args[0][0] != "'")){
-      prefixes.push(args[i++]);
-    }
+    var name, prefixes = [], i = args.length;
 
     do {
-        name = prefixes.join(" ");
-        prefixes.pop();
-    } while (name.length && !this.listeners(name).length);
+        name = args.slice(0,i--).join(" ");
+    } while (i && name.length && !this.listeners(name).length);
 
     if (this.listeners(name).length){
-      this.emit(name, args.slice(prefixes.length), unknown);
+      this.emit(name, args.slice(i+1), unknown);
     } else {
-      this.emit('*', args.slice(prefixes.length));
+      this.emit('*', args.slice(i+1));
     }
-
-    args.unshift(prefixes[0]);
 
   } else {
     outputHelpIfNecessary(this, unknown);

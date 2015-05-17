@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+// file: ./examples/multi-command
+var program = require('..');
+var data = {a:1, b:2, c:3};
+
+program
+  .version('0.0.1')
+  .command('data get <name>')
+  .action(function(name){
+    console.log(data[name]);
+  });
+
+program
+  .command('data set <name> <value>')
+  .action(function(name,value){
+    data[name] = value;
+    console.log(data);
+  });
+
+program
+  .command('data flush all')
+  .action(function(name,value){
+    console.log(data = {});
+  });
+
+program
+  .command('data')
+  .action(function(){
+    console.log(data);
+  });
+
+program
+  .parse(process.argv);
