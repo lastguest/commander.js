@@ -157,6 +157,34 @@ console.log('command:', cmdValue);
 console.log('environment:', envValue || "no environment given");
 ```
 
+## Multiple words commands
+
+```js
+// file: ./examples/pm
+var program = require('..');
+var options = {a:1, b:2, c:3};
+
+program
+  .version('0.0.1')
+  .command('option get <name>')
+  .action(function(name){
+    console.log(options[name]);
+  })
+
+  .command('option set <name> <value>')
+  .action(function(name,value){
+    console.log(options[name] = value);
+  })
+
+  .command('option delete all')
+  .action(function(name,value){
+    console.log(options = {});
+  })
+
+  .parse(process.argv);
+```
+
+
 ## Git-style sub-commands
 
 ```js
