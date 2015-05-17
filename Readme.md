@@ -160,7 +160,7 @@ console.log('environment:', envValue || "no environment given");
 ## Multiple words commands
 
 ```js
-// file: ./examples/pm
+// file: ./examples/multi-command
 var program = require('..');
 var options = {a:1, b:2, c:3};
 
