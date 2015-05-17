@@ -158,8 +158,12 @@ Command.prototype.__proto__ = EventEmitter.prototype;
 
 Command.prototype.command = function(name, desc, opts) {
   opts = opts || {};
-  var args = name.split(/ +/);
-  var cmd = new Command(args.shift());
+  var args = name.split(/ +/), cmds = [];
+
+  while (args.length && (args[0][0] != '<') && (args[0][0] != '[')){
+    cmds.push(args.shift());
+  }
+  var cmd = new Command(cmds.join(" "));
 
   if (desc) {
     cmd.description(desc);
@@ -183,7 +187,12 @@ Command.prototype.command = function(name, desc, opts) {
  */
 
 Command.prototype.arguments = function (desc) {
-  return this.parseExpectedArgs(desc.split(/ +/));
+  var cmds = [], args = desc.split(/ +/);
+  while (args[0] && !(args[0][0] in ['<','['])){
+    cmds.push(args.shift());
+  }
+  args.unshift(cmds.join(" "));
+  return this.parseExpectedArgs(args);
 }
 
 /**
@@ -302,6 +311,7 @@ Command.prototype.action = function(fn) {
   };
   var parent = this.parent || this;
   var name = parent === this ? '*' : this._name;
+
   parent.on(name, listener);
   if (this._alias) parent.on(this._alias, listener);
   return this;
@@ -602,15 +612,28 @@ Command.prototype.normalize = function(args) {
  */
 
 Command.prototype.parseArgs = function(args, unknown) {
-  var name;
 
-  if (args.length) {
-    name = args[0];
-    if (this.listeners(name).length) {
-      this.emit(args.shift(), args, unknown);
-    } else {
-      this.emit('*', args);
+  if (args.length){
+
+    var name, prefixes = [args.shift()], i = 0;
+
+    while ((i<args.length) && (args[0][0] != '-') && (args[0][0] != '"') && (args[0][0] != "'")){
+      prefixes.push(args[i++]);
     }
+
+    do {
+        name = prefixes.join(" ");
+        prefixes.pop();
+    } while (name.length && !this.listeners(name).length);
+
+    if (this.listeners(name).length){
+      this.emit(name, args.slice(prefixes.length), unknown);
+    } else {
+      this.emit('*', args.slice(prefixes.length));
+    }
+
+    args.unshift(prefixes[0]);
+
   } else {
     outputHelpIfNecessary(this, unknown);
 
